@@ -61,6 +61,8 @@ bool is_valid_file(const char *file, ssize_t *field_width)
 
     // Check to see if the file contains invalid characters
     char c;
+    bool has_zero = false;
+    bool has_one = false;
     while ((c = (char)fgetc(fp)) != -1)
     {
         
@@ -73,8 +75,19 @@ bool is_valid_file(const char *file, ssize_t *field_width)
                         return false;
                     }
                 }
+            } else if (!has_one) {
+                has_one = true;
             }
+        } else if (!has_zero) {
+            has_zero = true;
         }
+    }
+
+    // Was there any valid input?
+    if (!has_one && !has_zero) {
+        // No input in here!
+        fclose(fp);
+        return false;
     }
 
     // Reset fp
@@ -134,6 +147,12 @@ bool is_valid_file(const char *file, ssize_t *field_width)
     return true;
 }
 
+uint8_t **get_input_bits(const char *path_to_file, ssize_t *field_width)
+{
+    // Populate a two-dimensional array of bits from our input file
+    return NULL;
+}
+
 uint8_t **get_input(const char *path_to_file, int *reason, 
     ssize_t *field_width)
 {
@@ -155,11 +174,12 @@ uint8_t **get_input(const char *path_to_file, int *reason,
         return NULL;
     }
 
-    // At this point we have a file, it is not a directory, and we can read it
-    // Does it contain anything other than [ 0 | 1 | \n | EOF ]?
+    // Step 3: Validate the input file's contents
     if (!is_valid_file(path_to_file, field_width)) {
         *reason = NO_CONTENT;
         return NULL;
     }
-    return NULL;
+
+    // Step 4: Get our input bits
+    return get_input_bits(path_to_file, field_width);
 }
