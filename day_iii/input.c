@@ -93,10 +93,10 @@ bool is_valid_file(const char *file, ssize_t *field_width)
     // Reset fp
     rewind(fp);
 
-    // Get field width
+    // Get line width
     char *line = NULL;
     size_t n = 0;
-    *field_width = getline(&line, &n, fp);
+    ssize_t line_width = getline(&line, &n, fp);
     // Free our line
     if (line)
     {
@@ -111,7 +111,7 @@ bool is_valid_file(const char *file, ssize_t *field_width)
     do {
         //fprintf(stderr, "[DEBUG] Fetching current length\n");
         current_length = getline(&line, &n, fp);
-        if ((current_length != *field_width) && !feof(fp)) {
+        if ((current_length != line_width) && !feof(fp)) {
             fclose(fp);
             if (line) {
                 free(line);
@@ -121,14 +121,15 @@ bool is_valid_file(const char *file, ssize_t *field_width)
         // End of file is an edge case we need to check for
         // I don't like this though; I bet Aaron will point out how I could've
         // avoided duplicate work
-        if ((current_length == *field_width) && feof(fp)) {
+        if ((current_length == line_width) && feof(fp)) {
             fclose(fp);
             if (line) {
                 free(line);
             }
             return false;
         }
-        if (feof(fp) &&(current_length != (*field_width - 1))) {
+        if (feof(fp) &&(current_length != (line_width - 1))) {
+            // Edge case for end of file: line width includes the newline
             fclose(fp);
             if (line) {
                 free(line);
@@ -142,7 +143,8 @@ bool is_valid_file(const char *file, ssize_t *field_width)
         free(line);
     }
 
-    // Valid contents
+    // Valid contents; field width is one less than line width
+    *field_width = line_width - 1;
     fclose(fp);
     return true;
 }
@@ -179,7 +181,6 @@ uint8_t **get_input(const char *path_to_file, int *reason,
         *reason = NO_CONTENT;
         return NULL;
     }
-
     // Step 4: Get our input bits
     return get_input_bits(path_to_file, field_width);
 }
