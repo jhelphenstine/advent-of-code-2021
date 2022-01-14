@@ -24,7 +24,7 @@ test/testAll: $(TEST_OBJECTS) $(METER_LIBS)
 .PHONY: check
 check: test/testAll
 check:
-	cd test;./testAll;./test.sh;cd ..
+	cd test;./testAll;cd ..
 
 .PHONY: clean
 clean:
