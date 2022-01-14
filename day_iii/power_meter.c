@@ -15,6 +15,9 @@ int main(int argc, char **argv)
     }
 
     // Try to get the input array
+    ssize_t field_width = 0;
+    int reason = 0;
+    get_input(argv[1], &reason, &field_width);
 
     // Try to get the power consumption
 

@@ -17,6 +17,16 @@
  * @param field_width Width of a line of input
  * return A two-dimensional array containing the input bits
  */
-uint8_t **get_input(char *path_to_file, int *reason, int *field_width);
+uint8_t **get_input(const char *path_to_file, int *reason,
+    ssize_t *field_width);
+
+/** Enumerate reasons for failure
+ *
+ * OK
+ * Invalid File
+ * Forbidden
+ * Not Found
+ */
+enum { OK = 200, NO_CONTENT = 204, FORBIDDEN = 403, NOT_FOUND = 404 };
 
 #endif
