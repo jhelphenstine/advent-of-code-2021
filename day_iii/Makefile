@@ -1,7 +1,8 @@
 CFLAGS +=-std=c11 -Wall -Wextra -Wpedantic -Waggregate-return -Wwrite-strings -Wfloat-equal -Wvla
+CPPFLAGS += -D_POSIX_C_SOURCE=200809L
 METER_LIBS = input.c measure.c
 
-.DEFAULT_GOAL power_meter
+.DEFAULT_GOAL: power_meter
 
 power_meter: $(METER_LIBS)
 
@@ -9,7 +10,7 @@ power_meter: $(METER_LIBS)
 debug: CFLAGS +=-g
 debug: .DEFAULT_GOAL
 
-.PHONY profile
+.PHONY: profile
 profile: CFLAGS +=-pg
 profile: LDFLAGS +=-pg
 profile: .DEFAULT_GOAL
