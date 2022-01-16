@@ -43,9 +43,9 @@ int main(int argc, char **argv)
     uint8_t **readings = get_input(argv[1], &reason, &field_width, &count);
 
     // Try to get the power consumption
-    int power = get_power_consumption(readings, count, field_width);
+    int power = get_power_consumption(readings, &count, &field_width);
 
-    if (power = FAIL) {
+    if (FAIL == power) {
         fprintf(stderr, "[ERROR] Failed to determine power consumption\n");
     } else {
         // Report the power consumption
