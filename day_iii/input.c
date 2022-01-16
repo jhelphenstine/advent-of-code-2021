@@ -37,6 +37,7 @@ bool is_empty(const char *path)
 	return false;
 }
 
+// Validate that this is a file we have permission to read
 static void check_file(const char *path_to_file, int *reason)
 {
 	// Assume exists until proven otherwise
@@ -50,7 +51,8 @@ static void check_file(const char *path_to_file, int *reason)
 	}
 }
 
-bool is_valid_file(const char *file, ssize_t *field_width)
+// Is this a valid data input file?
+bool is_valid_file(const char *file, size_t *field_width, size_t *count)
 {
     // Open the file
     FILE *fp = fopen(file, "r");
@@ -110,6 +112,8 @@ bool is_valid_file(const char *file, ssize_t *field_width)
     ssize_t current_length = 0;
     do {
         //fprintf(stderr, "[DEBUG] Fetching current length\n");
+        line = NULL;
+        n = 0;
         current_length = getline(&line, &n, fp);
         if ((current_length != line_width) && !feof(fp)) {
             fclose(fp);
@@ -136,12 +140,16 @@ bool is_valid_file(const char *file, ssize_t *field_width)
             }
             return false;
         }
+
+        // Increment the count of our entries
+        (*count)++;
+
+        // Free our line
+        if (line)
+        {
+            free(line);
+        }
     } while (!feof(fp));
-    // Cleanup
-    if (line)
-    {
-        free(line);
-    }
 
     // Valid contents; field width is one less than line width
     *field_width = line_width - 1;
@@ -149,14 +157,81 @@ bool is_valid_file(const char *file, ssize_t *field_width)
     return true;
 }
 
-uint8_t **get_input_bits(const char *path_to_file, ssize_t *field_width)
+// Build out a multidimensional array with our input bits
+uint8_t **get_input_bits(const char *path_to_file, size_t *field_width,
+    size_t *count)
 {
     // Populate a two-dimensional array of bits from our input file
-    return NULL;
+    if (!path_to_file) {
+        // This shouldn't be something we need to check, given the
+        // guarding we do in is_valid_file, de-mo....
+        return NULL;
+    }
+
+    // Open the file
+    FILE *fp = fopen(path_to_file, "r");
+    if (!fp) {
+        return false;
+    }
+
+    // Build our array
+    uint8_t **readings = calloc(sizeof (uint8_t *), *count);
+    if (!readings) {
+        // Failed to malloc
+        fclose(fp);
+        return false;
+    }
+
+    for (size_t i = 0; i < *count; i++) {
+        readings[i] = calloc(sizeof (uint8_t *), *field_width);
+        if (!readings[i]) {
+            // Failed to malloc
+            free(readings);
+            // I am being lazy here - there could be alloc'd rows to delete...
+            fclose(fp);
+            return false;
+        }
+    }
+
+    // Temporary variables for our looping
+    char *line = NULL;
+    size_t n = 0;
+    
+    ssize_t len = 0;
+    
+    // Loop over the input, mapping to our array
+    for (size_t row = 0; row < *count; row++) {
+        
+        len = getline(&line, &n, fp);
+
+        if (!len) {
+            // TN1! Someone may have tampered between our fclose & fopen
+            fclose(fp);
+            return NULL;
+        }
+
+        // We only worry about the 1's; 0's are default thanks to calloc
+        // Newlines aren't a problem
+        for (size_t index = 0; index < (*field_width); index++) {
+            if (0 == memcmp(&line[index], "1", 1)) {
+                // Set the corresponding bit
+                readings[row][index] = 1;
+            }
+        }
+        free(line);
+        n = 0;
+    }
+
+    // Cleanup
+    fclose(fp);
+
+    // Return our multidimensional array of bits
+    fprintf(stderr, "[TEST] Returning with input bits!\n");
+    return readings;
 }
 
 uint8_t **get_input(const char *path_to_file, int *reason, 
-    ssize_t *field_width)
+    size_t *field_width, size_t *count)
 {
     // Step 0: Check that we were given something to work with
     if (!path_to_file) {
@@ -177,10 +252,14 @@ uint8_t **get_input(const char *path_to_file, int *reason,
     }
 
     // Step 3: Validate the input file's contents
-    if (!is_valid_file(path_to_file, field_width)) {
+    // We use this to determine the number of records, too
+    if (!is_valid_file(path_to_file, field_width, count)) {
         *reason = NO_CONTENT;
         return NULL;
     }
+
+    fprintf(stderr, "[TEST] %lu entries\n", *count);
+
     // Step 4: Get our input bits
-    return get_input_bits(path_to_file, field_width);
+    return get_input_bits(path_to_file, field_width, count);
 }
