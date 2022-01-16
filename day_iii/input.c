@@ -226,7 +226,6 @@ uint8_t **get_input_bits(const char *path_to_file, size_t *field_width,
     fclose(fp);
 
     // Return our multidimensional array of bits
-    fprintf(stderr, "[TEST] Returning with input bits!\n");
     return readings;
 }
 
@@ -257,8 +256,6 @@ uint8_t **get_input(const char *path_to_file, int *reason,
         *reason = NO_CONTENT;
         return NULL;
     }
-
-    fprintf(stderr, "[TEST] %lu entries\n", *count);
 
     // Step 4: Get our input bits
     return get_input_bits(path_to_file, field_width, count);
