@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include "measure.h"
 
+// Determine which measurement we are after
+enum { OXYGEN = 1, CARBON_DIOXIDE = 2 };
+
 // Determine gamma consumption rate, the most common bit per column
 size_t get_gamma_rate(uint8_t **readings, size_t *entries,
     size_t *field_width)
@@ -48,6 +51,44 @@ size_t get_gamma_rate(uint8_t **readings, size_t *entries,
     return gamma;
 }
 
+// Determine the mask bit
+uint8_t get_mask_bit(uint8_t **readings, size_t *entries,
+    size_t *field_width, int request, int position)
+{
+    ssize_t tally = 0;
+
+    for (size_t e  = 0; e < *entries; e++) {
+        if (readings[e][position] == 1) {
+            tally++;
+        } else {
+            tally--;
+        }
+    }
+
+    // Determine the tally
+    if (tally > 0) {
+        tally = 1;
+    } else {
+        tally = 0;
+    }
+
+    // Do we want oxygen or carbon dioxide?
+    if (OXYGEN == request) {
+        return tally;
+    } else {
+        return tally ^ 1;
+    }
+}
+
+// Determine the requested rating
+size_t get_rating(uint8_t **readings, size_t *entries,
+    size_t *field_width, int request)
+{
+    // Which is faster: building "field_width #" of linked lists,
+    // or pruning from one?
+    return 0;
+}
+
 int get_power_consumption(uint8_t **readings, size_t *entries,
     size_t *field_width)
 {
@@ -73,4 +114,16 @@ int get_power_consumption(uint8_t **readings, size_t *entries,
     epsilon >>= 1;
     
     return (int)gamma * (int)epsilon;
+}
+
+int get_life_support(uint8_t **readings, size_t *entries,
+    size_t *field_width)
+{
+    // Get the oxygen generator rate
+    size_t oxygen = get_rating(readings, entries, field_width, OXYGEN);
+
+    size_t carbon_dioxide = get_rating(readings, entries, field_width,
+                                       CARBON_DIOXIDE);
+
+    return (int)oxygen * (int)carbon_dioxide;
 }

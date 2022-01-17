@@ -6,6 +6,8 @@
  * This library determines the power consumption of our submarine, as a product
  * of the gamma and epsilon rates.
  */
+#include <stdint.h>
+#include <stdio.h>
 
 /** Get the power consumption of the submarine
  *
