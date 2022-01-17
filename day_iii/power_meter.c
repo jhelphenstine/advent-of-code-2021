@@ -45,11 +45,21 @@ int main(int argc, char **argv)
     // Try to get the power consumption
     int power = get_power_consumption(readings, &count, &field_width);
 
-    if (FAIL == power) {
-        fprintf(stderr, "[ERROR] Failed to determine power consumption\n");
+    if (0 == power) {
+        fprintf(stderr, "[ERROR] Failed to determine power consumption!\n");
     } else {
         // Report the power consumption
         fprintf(stdout, "[*] Power consumption: %d\n", power);
+    }
+
+    // Fetch the life support rating
+    int life_support = get_life_support(readings, &count, &field_width);
+
+    if (0 == life_support) {
+        fprintf(stderr, "[ERROR] Failed to determine life support rating!\n");
+    } else {
+        // Report the life support rating
+        fprintf(stdout, "[*] Life support rating: %d\n", life_support);
     }
 
     // Cleanup
