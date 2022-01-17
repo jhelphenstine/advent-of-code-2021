@@ -6,6 +6,8 @@
  * This library determines the power consumption of our submarine, as a product
  * of the gamma and epsilon rates.
  */
+#include <stdint.h>
+#include <stdio.h>
 
 /** Get the power consumption of the submarine
  *
@@ -14,16 +16,17 @@
  * @param field_width The width of an entry
  * return Power consumption of the submarine as an integer
  */
-int get_power_consumption(uint8_t **readings, size_t *entries,
+size_t get_power_consumption(uint8_t **readings, size_t *entries,
     size_t *field_width);
 
-/** Enum for failure
+/** Get the life support rating of the submarine
  *
- * 
- * Invalid File
- * Forbidden
- * Not Found
+ * @param readings A two dimensional array of bits
+ * @param entries The number of entries
+ * @param field_width The width of an entry
+ * return Life support rating of the submarine as an integer
  */
-enum { FAIL = -1 };
+size_t get_life_support(uint8_t **readings, size_t *entries,
+    size_t *field_width);
 
 #endif
