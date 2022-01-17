@@ -16,7 +16,7 @@
  * @param field_width The width of an entry
  * return Power consumption of the submarine as an integer
  */
-int get_power_consumption(uint8_t **readings, size_t *entries,
+size_t get_power_consumption(uint8_t **readings, size_t *entries,
     size_t *field_width);
 
 /** Get the life support rating of the submarine
@@ -26,7 +26,7 @@ int get_power_consumption(uint8_t **readings, size_t *entries,
  * @param field_width The width of an entry
  * return Life support rating of the submarine as an integer
  */
-int get_life_support(uint8_t **readings, size_t *entries,
+size_t get_life_support(uint8_t **readings, size_t *entries,
     size_t *field_width);
 
 #endif
